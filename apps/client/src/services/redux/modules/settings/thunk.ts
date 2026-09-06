@@ -167,3 +167,22 @@ export const changeStatUnit = myAsyncThunk<
     throw e;
   }
 });
+
+export const changeVisibleTopSongsColumns = myAsyncThunk<void, string[]>(
+  "@settings/change-visible-top-songs-columns",
+  async (newColumns, tapi) => {
+    try {
+      await api.setSetting("visibleTopSongsColumns", newColumns);
+      await tapi.dispatch(checkLogged());
+    } catch (e) {
+      console.error(e);
+      tapi.dispatch(
+        alertMessage({
+          level: "error",
+          message: "Could not update visible top songs columns",
+        }),
+      );
+      throw e;
+    }
+  },
+);

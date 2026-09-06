@@ -8,6 +8,11 @@ export interface GlobalPreferences {
   allowAffinity: boolean;
 }
 
+export interface ReleaseYearRange {
+  start?: number;
+  end?: number;
+}
+
 export enum Timesplit {
   all = "all",
   hour = "hour",

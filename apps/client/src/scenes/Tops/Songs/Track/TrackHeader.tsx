@@ -1,13 +1,20 @@
+import { useSelector } from "react-redux";
+
+import { GridRowWrapper } from "../../../../components/Grid";
 import Text from "../../../../components/Text";
 import { useMobile } from "../../../../services/hooks/hooks";
-import { GridRowWrapper } from "../../../../components/Grid";
+import { selectVisibleTopSongsColumns } from "../../../../services/redux/modules/user/selector";
+import { DEFAULT_VISIBLE_TOP_SONGS_COLUMNS, useTrackGrid } from "./TrackGrid";
+
 import s from "./index.module.css";
-import { useTrackGrid } from "./TrackGrid";
 
 export default function TrackHeader() {
   const [isMobile, isTablet] = useMobile();
 
   const trackGrid = useTrackGrid();
+  const visibleColumns =
+    useSelector(selectVisibleTopSongsColumns) ??
+    DEFAULT_VISIBLE_TOP_SONGS_COLUMNS;
 
   const columns = [
     { ...trackGrid.cover, node: <div aria-label="cover" /> },
@@ -21,15 +28,31 @@ export default function TrackHeader() {
     },
     {
       ...trackGrid.album,
-      node: !isTablet && (
+      node: !isTablet && visibleColumns.includes("album") && (
         <Text element="div" size="normal">
           Album name
         </Text>
       ),
     },
     {
+      ...trackGrid.releaseDate,
+      node: !isMobile && visibleColumns.includes("releaseDate") && (
+        <Text element="div" size="normal">
+          Released
+        </Text>
+      ),
+    },
+    {
+      ...trackGrid.albumType,
+      node: !isMobile && visibleColumns.includes("albumType") && (
+        <Text element="div" size="normal">
+          Type
+        </Text>
+      ),
+    },
+    {
       ...trackGrid.duration,
-      node: !isMobile && (
+      node: !isMobile && visibleColumns.includes("duration") && (
         <Text element="div" size="normal">
           Duration
         </Text>

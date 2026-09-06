@@ -2,6 +2,13 @@ import { Schema, Types } from "mongoose";
 
 export type DarkModeType = "follow" | "dark" | "light";
 
+export const DEFAULT_VISIBLE_TOP_SONGS_COLUMNS = [
+  "album",
+  "releaseDate",
+  "albumType",
+  "duration",
+];
+
 export interface User {
   _id: Types.ObjectId;
   username: string;
@@ -21,6 +28,7 @@ export interface User {
     timezone: string | undefined;
     dateFormat: string;
     blacklistedArtists: string[];
+    visibleTopSongsColumns: string[];
   };
   lastImport: string | null;
   publicToken: string | null;
@@ -59,6 +67,10 @@ export const UserSchema = new Schema<User>(
       blacklistedArtists: [{ type: String }],
       timezone: { type: String, default: undefined, required: false },
       dateFormat: { type: String, required: true },
+      visibleTopSongsColumns: {
+        type: [String],
+        default: DEFAULT_VISIBLE_TOP_SONGS_COLUMNS,
+      },
     },
     lastImport: { type: String, default: null },
     publicToken: { type: String, default: null, index: true },
