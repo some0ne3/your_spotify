@@ -16,11 +16,13 @@ export function useInfiniteScroll<T>(
 ) {
   const [items, setItems] = useState<T[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const generation = useRef(0);
 
   const ref = useRef<(force?: boolean) => void>(() => {});
 
   ref.current = async (isNew = false) => {
     if (!hasMore && !isNew) return;
+    const currentGeneration = generation.current;
     try {
       const result = await call(
         interval.start,
@@ -28,6 +30,9 @@ export function useInfiniteScroll<T>(
         DEFAULT_ITEMS_TO_LOAD,
         isNew ? 0 : items.length,
       );
+      if (currentGeneration !== generation.current) {
+        return;
+      }
       const filteredData = filter ? result.data.filter(filter) : result.data;
       if (isNew) {
         setItems([...filteredData]);
@@ -41,6 +46,7 @@ export function useInfiniteScroll<T>(
   };
 
   useEffect(() => {
+    generation.current += 1;
     setHasMore(true);
     setItems([]);
     setTimeout(() => ref.current?.(true), 0);
