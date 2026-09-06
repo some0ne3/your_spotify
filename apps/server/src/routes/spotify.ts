@@ -197,14 +197,38 @@ const intervalPerSchemaNbOffset = z.object({
   offset: z.preprocess(toNumber, z.number().min(0).default(0)),
 });
 
+const releaseRangeSchema = z.object({
+  start: z.number().int().optional(),
+  end: z.number().int().optional(),
+});
+
+const topSongsSchema = intervalPerSchemaNbOffset.extend({
+  releaseRanges: z.preprocess((val) => {
+    if (typeof val !== "string") return undefined;
+    try {
+      return JSON.parse(val);
+    } catch {
+      return undefined;
+    }
+  }, z.array(releaseRangeSchema).optional()),
+});
+
 router.get("/top/songs", isLoggedOrGuest, async (req, res) => {
   const { user } = req as LoggedRequest;
-  const { start, end, nb, offset } = validate(
+  const { start, end, nb, offset, releaseRanges } = validate(
     req.query,
-    intervalPerSchemaNbOffset,
+    topSongsSchema,
   );
 
-  const result = await getBest(ItemType.track, user, start, end, nb, offset);
+  const result = await getBest(
+    ItemType.track,
+    user,
+    start,
+    end,
+    nb,
+    offset,
+    releaseRanges,
+  );
   res.status(200).send(result);
 });
 

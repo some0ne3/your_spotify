@@ -1,18 +1,22 @@
-import { Fragment } from "react";
 import clsx from "clsx";
-import { msToDuration } from "../../../../services/stats";
-import { Artist, Album, Track as TrackType } from "../../../../services/types";
-import InlineArtist from "../../../../components/InlineArtist";
-import InlineTrack from "../../../../components/InlineTrack";
-import Text from "../../../../components/Text";
-import PlayButton from "../../../../components/PlayButton";
-import TrackOptions from "../../../../components/TrackOptions";
-import { useMobile } from "../../../../services/hooks/hooks";
+import { Fragment } from "react";
+import { useSelector } from "react-redux";
+
 import { GridRowWrapper } from "../../../../components/Grid";
 import InlineAlbum from "../../../../components/InlineAlbum";
+import InlineArtist from "../../../../components/InlineArtist";
+import InlineTrack from "../../../../components/InlineTrack";
 import LongClickableTrack from "../../../../components/LongClickableTrack";
+import PlayButton from "../../../../components/PlayButton";
+import Text from "../../../../components/Text";
+import TrackOptions from "../../../../components/TrackOptions";
+import { useMobile } from "../../../../services/hooks/hooks";
+import { selectVisibleTopSongsColumns } from "../../../../services/redux/modules/user/selector";
+import { msToDuration } from "../../../../services/stats";
+import { Artist, Album, Track as TrackType } from "../../../../services/types";
+import { DEFAULT_VISIBLE_TOP_SONGS_COLUMNS, useTrackGrid } from "./TrackGrid";
+
 import s from "./index.module.css";
-import { useTrackGrid } from "./TrackGrid";
 
 interface TrackProps {
   track: TrackType;
@@ -29,6 +33,9 @@ interface TrackProps {
 export default function Track(props: TrackProps) {
   const [isMobile, isTablet, isDesktop] = useMobile();
   const trackGrid = useTrackGrid();
+  const visibleColumns =
+    useSelector(selectVisibleTopSongsColumns) ??
+    DEFAULT_VISIBLE_TOP_SONGS_COLUMNS;
 
   const {
     track,
@@ -75,7 +82,7 @@ export default function Track(props: TrackProps) {
     },
     {
       ...trackGrid.album,
-      node: !isTablet && album && (
+      node: !isTablet && visibleColumns.includes("album") && album && (
         <InlineAlbum
           element="div"
           className="otext"
@@ -85,8 +92,26 @@ export default function Track(props: TrackProps) {
       ),
     },
     {
+      ...trackGrid.releaseDate,
+      node: !isMobile && visibleColumns.includes("releaseDate") && album && (
+        <Text element="div" size="normal">
+          {album.release_date?.split("-")[0]}
+        </Text>
+      ),
+    },
+    {
+      ...trackGrid.albumType,
+      node: !isMobile && visibleColumns.includes("albumType") && album && (
+        <Text element="div" size="normal">
+          {album.album_type &&
+            album.album_type.charAt(0).toUpperCase() +
+              album.album_type.slice(1)}
+        </Text>
+      ),
+    },
+    {
       ...trackGrid.duration,
-      node: !isMobile && (
+      node: !isMobile && visibleColumns.includes("duration") && (
         <Text element="div" size="normal">
           {msToDuration(track.duration_ms)}
         </Text>

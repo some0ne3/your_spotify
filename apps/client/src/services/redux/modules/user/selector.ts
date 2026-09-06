@@ -1,4 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
+
 import { RootState } from "../..";
 import { getRawIntervalDetail, RawIntervalDetail } from "../../../intervals";
 import { fromReduxIntervalDetail } from "./utils";
@@ -70,4 +71,8 @@ export const selectBlacklistedArtist = (artistId: string) =>
 export const selectBlacklistedArtists = createSelector(
   selectUser,
   (user) => user?.settings.blacklistedArtists ?? [],
+);
+export const selectVisibleTopSongsColumns = createSelector(
+  selectUser,
+  (user) => user?.settings.visibleTopSongsColumns,
 );

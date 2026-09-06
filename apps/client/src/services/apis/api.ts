@@ -1,4 +1,5 @@
 import Axios from "axios";
+
 import { AdminAccount } from "../redux/modules/admin/reducer";
 import { ImporterState } from "../redux/modules/import/types";
 import { Playlist, PlaylistContext } from "../redux/modules/playlist/types";
@@ -18,6 +19,7 @@ import {
   UnboxPromise,
   TrackWithFullArtistAlbum,
   AlbumWithFullArtist,
+  ReleaseYearRange,
 } from "../types";
 
 const axios = Axios.create({
@@ -257,7 +259,13 @@ export const api = {
       tracks: TrackWithFullArtistAlbum[];
       albums: AlbumWithFullArtist[];
     }>(`/search/${str}`),
-  getBestSongs: (start: Date, end: Date, nb: number, offset: number) =>
+  getBestSongs: (
+    start: Date,
+    end: Date,
+    nb: number,
+    offset: number,
+    releaseRanges?: ReleaseYearRange[],
+  ) =>
     get<
       {
         count: number;
@@ -268,7 +276,15 @@ export const api = {
         artist: Artist;
         track: Track;
       }[]
-    >("/spotify/top/songs", { start, end, nb, offset }),
+    >("/spotify/top/songs", {
+      start,
+      end,
+      nb,
+      offset,
+      releaseRanges: releaseRanges?.length
+        ? JSON.stringify(releaseRanges)
+        : undefined,
+    }),
   getBestArtists: (start: Date, end: Date, nb: number, offset: number) =>
     get<
       {

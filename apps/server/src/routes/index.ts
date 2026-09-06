@@ -56,6 +56,7 @@ const settingsSchema = z.object({
     .nullable()
     .transform((e) => e ?? undefined)
     .optional(),
+  visibleTopSongsColumns: z.array(z.string()).optional(),
 });
 
 router.post("/settings", logged, async (req, res) => {

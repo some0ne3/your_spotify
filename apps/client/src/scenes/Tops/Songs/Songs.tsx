@@ -1,32 +1,41 @@
+import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useSelector } from "react-redux";
+
 import AddToPlaylist from "../../../components/AddToPlaylist";
 import { GridWrapper } from "../../../components/Grid";
 import Header from "../../../components/Header";
+import { TrackSelectionPopup } from "../../../components/History/Track/TrackSelectionPopup";
 import Loader from "../../../components/Loader";
 import { DEFAULT_PLAYLIST_NB } from "../../../components/PlaylistDialog/PlaylistDialog";
-import TitleCard from "../../../components/TitleCard";
-import { api } from "../../../services/apis/api";
-import { selectRawIntervalDetail } from "../../../services/redux/modules/user/selector";
-import { useInfiniteScroll } from "../../../services/hooks/scrolling";
-import { useSelectTracks } from "../../../services/hooks/useSelectTrack";
+import ReleaseDateFilter from "../../../components/ReleaseDateFilter";
+import { RightClickable } from "../../../components/RightClickable/RightClickable";
 import {
   Selectable,
   SelectableContextProvider,
 } from "../../../components/Selectable/Selectable.context";
-import { RightClickable } from "../../../components/RightClickable/RightClickable";
-import { TrackSelectionPopup } from "../../../components/History/Track/TrackSelectionPopup";
+import TitleCard from "../../../components/TitleCard";
+import { api } from "../../../services/apis/api";
+import { useInfiniteScroll } from "../../../services/hooks/scrolling";
+import { useSelectTracks } from "../../../services/hooks/useSelectTrack";
+import { PlaylistContext } from "../../../services/redux/modules/playlist/types";
+import { selectRawIntervalDetail } from "../../../services/redux/modules/user/selector";
+import { ReleaseYearRange } from "../../../services/types";
 import Track from "./Track";
 import TrackHeader from "./Track/TrackHeader";
+
 import s from "./index.module.css";
-import { PlaylistContext } from "../../../services/redux/modules/playlist/types";
 
 export default function Songs() {
   const { interval } = useSelector(selectRawIntervalDetail);
+  const [releaseRanges, setReleaseRanges] = useState<ReleaseYearRange[]>([]);
 
   const { items, hasMore, onNext } = useInfiniteScroll(
     interval,
-    api.getBestSongs,
+    (start, end, nb, offset) =>
+      api.getBestSongs(start, end, nb, offset, releaseRanges),
+    undefined,
+    [releaseRanges],
   );
 
   const context: PlaylistContext = {
@@ -49,7 +58,15 @@ export default function Songs() {
           <TitleCard
             noBorder
             title="Top songs"
-            right={<AddToPlaylist context={context} />}>
+            right={
+              <div className={s.actions}>
+                <ReleaseDateFilter
+                  value={releaseRanges}
+                  onChange={setReleaseRanges}
+                />
+                <AddToPlaylist context={context} />
+              </div>
+            }>
             <SelectableContextProvider
               selected={selectedTracks}
               setSelected={setSelectedTracks}>

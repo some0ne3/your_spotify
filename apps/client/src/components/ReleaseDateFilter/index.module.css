@@ -1,0 +1,33 @@
+.dialogcontent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 320px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customrange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yearinput {
+  width: 100px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+}

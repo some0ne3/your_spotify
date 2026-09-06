@@ -180,7 +180,18 @@ export const lightAlbumLookupPipeline = (idField = "track.album") => ({
   let: { id: `$${idField}` },
   pipeline: [
     { $match: { $expr: { $eq: ["$id", "$$id"] } } },
-    { $project: { _id: 1, id: 1, name: 1, artists: 1, images: 1 } },
+    {
+      $project: {
+        _id: 1,
+        id: 1,
+        name: 1,
+        artists: 1,
+        images: 1,
+        release_date: 1,
+        release_date_precision: 1,
+        album_type: 1,
+      },
+    },
   ],
   from: "albums",
   as: "album",

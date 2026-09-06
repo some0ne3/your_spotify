@@ -463,6 +463,44 @@ export const getBestArtistsPer = async (
   return res;
 };
 
+export interface ReleaseYearRange {
+  start?: number;
+  end?: number;
+}
+
+const releaseYearFilterStages = (releaseRanges: ReleaseYearRange[]) => [
+  {
+    $lookup: {
+      from: "albums",
+      localField: "albumId",
+      foreignField: "id",
+      as: "releaseFilterAlbum",
+    },
+  },
+  { $unwind: "$releaseFilterAlbum" },
+  {
+    $addFields: {
+      releaseYear: {
+        $toInt: {
+          $arrayElemAt: [
+            { $split: ["$releaseFilterAlbum.release_date", "-"] },
+            0,
+          ],
+        },
+      },
+    },
+  },
+  {
+    $match: {
+      $or: releaseRanges.map(({ start, end }) => ({
+        ...(start !== undefined ? { releaseYear: { $gte: start } } : {}),
+        ...(end !== undefined ? { releaseYear: { $lte: end } } : {}),
+      })),
+    },
+  },
+  { $project: { releaseFilterAlbum: 0, releaseYear: 0 } },
+];
+
 export const getBest = (
   itemType: ItemType,
   user: User,
@@ -470,6 +508,7 @@ export const getBest = (
   end: Date,
   nb: number,
   offset: number,
+  releaseRanges?: ReleaseYearRange[],
 ) =>
   InfosModel.aggregate([
     ...basicMatch(user._id, start, end),
@@ -485,6 +524,7 @@ export const getBest = (
       },
     },
     { $addFields: { differents: { $size: "$trackIds" } } },
+    ...(releaseRanges?.length ? releaseYearFilterStages(releaseRanges) : []),
     {
       $facet: {
         infos: [

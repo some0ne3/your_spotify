@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+
 import { DEFAULT_ITEMS_TO_LOAD } from "../apis/api";
 import { Interval } from "../intervals";
 
@@ -11,6 +12,7 @@ export function useInfiniteScroll<T>(
     offset: number,
   ) => Promise<{ data: T[] }>,
   filter?: (item: T) => boolean,
+  deps: unknown[] = [],
 ) {
   const [items, setItems] = useState<T[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -42,7 +44,8 @@ export function useInfiniteScroll<T>(
     setHasMore(true);
     setItems([]);
     setTimeout(() => ref.current?.(true), 0);
-  }, [interval]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interval, ...deps]);
 
   return { items, hasMore, onNext: ref.current };
 }
