@@ -492,10 +492,12 @@ const releaseYearFilterStages = (releaseRanges: ReleaseYearRange[]) => [
   },
   {
     $match: {
-      $or: releaseRanges.map(({ start, end }) => ({
-        ...(start !== undefined ? { releaseYear: { $gte: start } } : {}),
-        ...(end !== undefined ? { releaseYear: { $lte: end } } : {}),
-      })),
+      $or: releaseRanges.map(({ start, end }) => {
+        const bounds: { $gte?: number; $lte?: number } = {};
+        if (start !== undefined) bounds.$gte = start;
+        if (end !== undefined) bounds.$lte = end;
+        return { releaseYear: bounds };
+      }),
     },
   },
   { $project: { releaseFilterAlbum: 0, releaseYear: 0 } },
